@@ -63,20 +63,11 @@ def convert_task_to_tag(tasks, lists: Lists) -> list:
 @click.argument('export', type=click.File('rb'))
 def cli(export):
     rtm_export = json.loads(export.read())
-    rtm_import = {}
-
-    for key, values in rtm_export.items():
-        if key in ('config'):
-            rtm_import[key] = values
-        if type(values) == list:
-            rtm_import[key] = []
-        elif type(values) == dict:
-            rtm_import[key] = []
+    rtm_import = copy.deepcopy(rtm_export)
 
     lists = Lists(rtm_export['lists'])
     rtm_import['tags'] = convert_list_to_tag(lists)
     rtm_import['tasks'] = convert_task_to_tag(rtm_export['tasks'], lists)
-    rtm_import['lists'] = [lists.inbox]
 
     path = f'imports/{datetime.now().isoformat()}.json'
     Path(path).write_text(json.dumps(rtm_import, indent=2))
